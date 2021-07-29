@@ -1,4 +1,4 @@
-module openfiledialog
+module github.com/Tobotobo/openfiledialog
 
 go 1.16
 
