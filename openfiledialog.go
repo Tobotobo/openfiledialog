@@ -153,21 +153,25 @@ func Title(title string) *OpenFileDialog {
 
 // ----------------------------------------------------------------
 
-func (dlg *OpenFileDialog) Filter(filter string, index int) *OpenFileDialog {
+func (dlg *OpenFileDialog) Filter(filter string, index ...int) *OpenFileDialog {
 	dlg.FilterText = filter
-	dlg.FilterIndex = index
+	if len(index) > 0 {
+		dlg.FilterIndex = index[0]
+	}
 	return dlg
 }
 
-func (dlg *MultOpenFileDialog) Filter(filter string, index int) *MultOpenFileDialog {
+func (dlg *MultOpenFileDialog) Filter(filter string, index ...int) *MultOpenFileDialog {
 	dlg.FilterText = filter
-	dlg.FilterIndex = index
+	if len(index) > 0 {
+		dlg.FilterIndex = index[0]
+	}
 	return dlg
 }
 
-func Filter(filter string, index int) *OpenFileDialog {
+func Filter(filter string, index ...int) *OpenFileDialog {
 	dlg := New()
-	return dlg.Filter(filter, index)
+	return dlg.Filter(filter, index...)
 }
 
 // ----------------------------------------------------------------

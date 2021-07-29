@@ -19,10 +19,7 @@ func main() {
 ```
 タイトル、フィルター指定
 ``` go
-openfiledialog
-  .Title("Excel選択")
-  .Filter("Excel(*.xlsx)|(*.xlsx)", 1)
-  .Show()
+openfiledialog.Title("Excel選択").Filter("Excel(*.xlsx)|(*.xlsx)").Show()
 ```
 複数選択可
 ``` go
