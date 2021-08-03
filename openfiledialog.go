@@ -1,11 +1,17 @@
+// openfiledialog.go
+// Copyright (c) 2021 Tobotobo
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+
 package openfiledialog
 
 import (
-	"github.com/lxn/walk"
+	"github.com/Tobotobo/commondialogs"
+	"github.com/lxn/win"
 )
 
 type OpenFileDialog struct {
-	OwnerForm      *walk.Form
+	OwnerForm      win.HWND
 	TitleText      string
 	FilterText     string
 	FilterIndex    int
@@ -14,7 +20,7 @@ type OpenFileDialog struct {
 }
 
 type MultOpenFileDialog struct {
-	OwnerForm      *walk.Form
+	OwnerForm      win.HWND
 	TitleText      string
 	FilterText     string
 	FilterIndex    int
@@ -24,7 +30,7 @@ type MultOpenFileDialog struct {
 
 func New() *OpenFileDialog {
 	return &OpenFileDialog{
-		OwnerForm:      nil,
+		OwnerForm:      0,
 		TitleText:      "ファイルを開く",
 		FilterText:     "すべてのファイル(*.*)|*.*",
 		FilterIndex:    1,
@@ -35,7 +41,7 @@ func New() *OpenFileDialog {
 
 func NewMult() *MultOpenFileDialog {
 	return &MultOpenFileDialog{
-		OwnerForm:      nil,
+		OwnerForm:      0,
 		TitleText:      "ファイルを開く",
 		FilterText:     "すべてのファイル(*.*)|*.*",
 		FilterIndex:    1,
@@ -57,7 +63,7 @@ func (dlg *OpenFileDialog) convertToMult() *MultOpenFileDialog {
 // ----------------------------------------------------------------
 
 func (dlg *OpenFileDialog) Show() (accepted bool, filePath string) {
-	wdlg := new(walk.FileDialog)
+	wdlg := new(commondialogs.FileDialog)
 	wdlg.Title = dlg.TitleText
 	wdlg.Filter = dlg.FilterText
 	wdlg.FilterIndex = dlg.FilterIndex
@@ -66,12 +72,7 @@ func (dlg *OpenFileDialog) Show() (accepted bool, filePath string) {
 	wdlg.InitialDirPath = dlg.InitialDirPath
 	// wdlg.Flags
 
-	var owner walk.Form = nil
-	if dlg.OwnerForm != nil {
-		owner = *dlg.OwnerForm
-	}
-
-	ok, err := wdlg.ShowOpen(owner)
+	ok, err := wdlg.ShowOpen(dlg.OwnerForm)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +81,7 @@ func (dlg *OpenFileDialog) Show() (accepted bool, filePath string) {
 }
 
 func (dlg *MultOpenFileDialog) Show() (accepted bool, filePaths []string) {
-	wdlg := new(walk.FileDialog)
+	wdlg := new(commondialogs.FileDialog)
 	wdlg.Title = dlg.TitleText
 	wdlg.Filter = dlg.FilterText
 	wdlg.FilterIndex = dlg.FilterIndex
@@ -89,12 +90,7 @@ func (dlg *MultOpenFileDialog) Show() (accepted bool, filePaths []string) {
 	wdlg.InitialDirPath = dlg.InitialDirPath
 	// wdlg.Flags
 
-	var owner walk.Form = nil
-	if dlg.OwnerForm != nil {
-		owner = *dlg.OwnerForm
-	}
-
-	ok, err := wdlg.ShowOpenMultiple(owner)
+	ok, err := wdlg.ShowOpenMultiple(dlg.OwnerForm)
 	if err != nil {
 		panic(err)
 	}
@@ -119,17 +115,17 @@ func Mult() *MultOpenFileDialog {
 
 // ----------------------------------------------------------------
 
-func (dlg *OpenFileDialog) Owner(owner *walk.Form) *OpenFileDialog {
+func (dlg *OpenFileDialog) Owner(owner win.HWND) *OpenFileDialog {
 	dlg.OwnerForm = owner
 	return dlg
 }
 
-func (dlg *MultOpenFileDialog) Owner(owner *walk.Form) *MultOpenFileDialog {
+func (dlg *MultOpenFileDialog) Owner(owner win.HWND) *MultOpenFileDialog {
 	dlg.OwnerForm = owner
 	return dlg
 }
 
-func Owner(owner *walk.Form) *OpenFileDialog {
+func Owner(owner win.HWND) *OpenFileDialog {
 	dlg := New()
 	return dlg.Owner(owner)
 }
