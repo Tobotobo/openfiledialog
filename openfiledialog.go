@@ -10,53 +10,65 @@ import (
 	"github.com/lxn/win"
 )
 
-type OpenFileDialog struct {
-	OwnerForm      win.HWND
-	TitleText      string
-	FilterText     string
+type openFileDialog struct {
+	Owner          win.HWND
+	Title          string
+	Filter         string
 	FilterIndex    int
 	FilePath       string
 	InitialDirPath string
 }
 
-type MultOpenFileDialog struct {
-	OwnerForm      win.HWND
-	TitleText      string
-	FilterText     string
+type OpenFileDialog struct {
+	InnerValue openFileDialog
+}
+
+type multOpenFileDialog struct {
+	Owner          win.HWND
+	Title          string
+	Filter         string
 	FilterIndex    int
 	FilePaths      []string
 	InitialDirPath string
 }
 
+type MultOpenFileDialog struct {
+	InnerValue multOpenFileDialog
+}
+
 func New() *OpenFileDialog {
 	return &OpenFileDialog{
-		OwnerForm:      0,
-		TitleText:      "ファイルを開く",
-		FilterText:     "すべてのファイル(*.*)|*.*",
-		FilterIndex:    1,
-		FilePath:       "",
-		InitialDirPath: "",
+		InnerValue: openFileDialog{
+			Owner:          0,
+			Title:          "ファイルを開く",
+			Filter:         "すべてのファイル(*.*)|*.*",
+			FilterIndex:    1,
+			FilePath:       "",
+			InitialDirPath: "",
+		},
 	}
 }
 
 func NewMult() *MultOpenFileDialog {
 	return &MultOpenFileDialog{
-		OwnerForm:      0,
-		TitleText:      "ファイルを開く",
-		FilterText:     "すべてのファイル(*.*)|*.*",
-		FilterIndex:    1,
-		FilePaths:      []string{},
-		InitialDirPath: "",
+		InnerValue: multOpenFileDialog{
+			Owner:          0,
+			Title:          "ファイルを開く",
+			Filter:         "すべてのファイル(*.*)|*.*",
+			FilterIndex:    1,
+			FilePaths:      []string{},
+			InitialDirPath: "",
+		},
 	}
 }
 
 func (dlg *OpenFileDialog) convertToMult() *MultOpenFileDialog {
 	multDlg := NewMult()
-	multDlg.OwnerForm = dlg.OwnerForm
-	multDlg.TitleText = dlg.TitleText
-	multDlg.FilterText = dlg.FilterText
-	multDlg.FilterIndex = dlg.FilterIndex
-	multDlg.InitialDirPath = dlg.InitialDirPath
+	multDlg.InnerValue.Owner = dlg.InnerValue.Owner
+	multDlg.InnerValue.Title = dlg.InnerValue.Title
+	multDlg.InnerValue.Filter = dlg.InnerValue.Filter
+	multDlg.InnerValue.FilterIndex = dlg.InnerValue.FilterIndex
+	multDlg.InnerValue.InitialDirPath = dlg.InnerValue.InitialDirPath
 	return multDlg
 }
 
@@ -64,36 +76,38 @@ func (dlg *OpenFileDialog) convertToMult() *MultOpenFileDialog {
 
 func (dlg *OpenFileDialog) Show() (accepted bool, filePath string) {
 	wdlg := new(commondialogs.FileDialog)
-	wdlg.Title = dlg.TitleText
-	wdlg.Filter = dlg.FilterText
-	wdlg.FilterIndex = dlg.FilterIndex
+	wdlg.Title = dlg.InnerValue.Title
+	wdlg.Filter = dlg.InnerValue.Filter
+	wdlg.FilterIndex = dlg.InnerValue.FilterIndex
 	// wdlg.ShowReadOnlyCB ※読み取り専用で開くが選ばれたかどうかが渡ってこないため未対応
-	wdlg.FilePath = dlg.FilePath
-	wdlg.InitialDirPath = dlg.InitialDirPath
+	wdlg.FilePath = dlg.InnerValue.FilePath
+	wdlg.InitialDirPath = dlg.InnerValue.InitialDirPath
 	// wdlg.Flags
 
-	ok, err := wdlg.ShowOpen(dlg.OwnerForm)
+	ok, err := wdlg.ShowOpen(dlg.InnerValue.Owner)
 	if err != nil {
 		panic(err)
 	}
+	dlg.InnerValue.FilePath = wdlg.FilePath
 
 	return ok, wdlg.FilePath
 }
 
 func (dlg *MultOpenFileDialog) Show() (accepted bool, filePaths []string) {
 	wdlg := new(commondialogs.FileDialog)
-	wdlg.Title = dlg.TitleText
-	wdlg.Filter = dlg.FilterText
-	wdlg.FilterIndex = dlg.FilterIndex
+	wdlg.Title = dlg.InnerValue.Title
+	wdlg.Filter = dlg.InnerValue.Filter
+	wdlg.FilterIndex = dlg.InnerValue.FilterIndex
 	// wdlg.ShowReadOnlyCB ※読み取り専用で開くが選ばれたかどうかが渡ってこないため未対応
-	wdlg.FilePaths = dlg.FilePaths
-	wdlg.InitialDirPath = dlg.InitialDirPath
+	wdlg.FilePaths = dlg.InnerValue.FilePaths
+	wdlg.InitialDirPath = dlg.InnerValue.InitialDirPath
 	// wdlg.Flags
 
-	ok, err := wdlg.ShowOpenMultiple(dlg.OwnerForm)
+	ok, err := wdlg.ShowOpenMultiple(dlg.InnerValue.Owner)
 	if err != nil {
 		panic(err)
 	}
+	dlg.InnerValue.FilePaths = wdlg.FilePaths
 
 	return ok, wdlg.FilePaths
 }
@@ -116,12 +130,12 @@ func Mult() *MultOpenFileDialog {
 // ----------------------------------------------------------------
 
 func (dlg *OpenFileDialog) Owner(owner win.HWND) *OpenFileDialog {
-	dlg.OwnerForm = owner
+	dlg.InnerValue.Owner = owner
 	return dlg
 }
 
 func (dlg *MultOpenFileDialog) Owner(owner win.HWND) *MultOpenFileDialog {
-	dlg.OwnerForm = owner
+	dlg.InnerValue.Owner = owner
 	return dlg
 }
 
@@ -133,12 +147,12 @@ func Owner(owner win.HWND) *OpenFileDialog {
 // ----------------------------------------------------------------
 
 func (dlg *OpenFileDialog) Title(title string) *OpenFileDialog {
-	dlg.TitleText = title
+	dlg.InnerValue.Title = title
 	return dlg
 }
 
 func (dlg *MultOpenFileDialog) Title(title string) *MultOpenFileDialog {
-	dlg.TitleText = title
+	dlg.InnerValue.Title = title
 	return dlg
 }
 
@@ -150,17 +164,17 @@ func Title(title string) *OpenFileDialog {
 // ----------------------------------------------------------------
 
 func (dlg *OpenFileDialog) Filter(filter string, index ...int) *OpenFileDialog {
-	dlg.FilterText = filter
+	dlg.InnerValue.Filter = filter
 	if len(index) > 0 {
-		dlg.FilterIndex = index[0]
+		dlg.InnerValue.FilterIndex = index[0]
 	}
 	return dlg
 }
 
 func (dlg *MultOpenFileDialog) Filter(filter string, index ...int) *MultOpenFileDialog {
-	dlg.FilterText = filter
+	dlg.InnerValue.Filter = filter
 	if len(index) > 0 {
-		dlg.FilterIndex = index[0]
+		dlg.InnerValue.FilterIndex = index[0]
 	}
 	return dlg
 }
@@ -173,7 +187,7 @@ func Filter(filter string, index ...int) *OpenFileDialog {
 // ----------------------------------------------------------------
 
 func (dlg *OpenFileDialog) InitFilePath(path string) *OpenFileDialog {
-	dlg.FilePath = path
+	dlg.InnerValue.FilePath = path
 	return dlg
 }
 
@@ -198,12 +212,12 @@ func InitFilePath(path string) *OpenFileDialog {
 // ----------------------------------------------------------------
 
 func (dlg *OpenFileDialog) InitDirPath(path string) *OpenFileDialog {
-	dlg.InitialDirPath = path
+	dlg.InnerValue.InitialDirPath = path
 	return dlg
 }
 
 func (dlg *MultOpenFileDialog) InitDirPath(path string) *MultOpenFileDialog {
-	dlg.InitialDirPath = path
+	dlg.InnerValue.InitialDirPath = path
 	return dlg
 }
 
