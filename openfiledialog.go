@@ -74,7 +74,7 @@ func (dlg *OpenFileDialog) convertToMult() *MultOpenFileDialog {
 
 // ----------------------------------------------------------------
 
-func (dlg *OpenFileDialog) Show() (accepted bool, filePath string) {
+func (dlg *OpenFileDialog) Show() (filePath string, accepted bool) {
 	wdlg := new(commondialogs.FileDialog)
 	wdlg.Title = dlg.InnerValue.Title
 	wdlg.Filter = dlg.InnerValue.Filter
@@ -90,10 +90,10 @@ func (dlg *OpenFileDialog) Show() (accepted bool, filePath string) {
 	}
 	dlg.InnerValue.FilePath = wdlg.FilePath
 
-	return ok, wdlg.FilePath
+	return wdlg.FilePath, ok
 }
 
-func (dlg *MultOpenFileDialog) Show() (accepted bool, filePaths []string) {
+func (dlg *MultOpenFileDialog) Show() (filePaths []string, accepted bool) {
 	wdlg := new(commondialogs.FileDialog)
 	wdlg.Title = dlg.InnerValue.Title
 	wdlg.Filter = dlg.InnerValue.Filter
@@ -109,10 +109,10 @@ func (dlg *MultOpenFileDialog) Show() (accepted bool, filePaths []string) {
 	}
 	dlg.InnerValue.FilePaths = wdlg.FilePaths
 
-	return ok, wdlg.FilePaths
+	return wdlg.FilePaths, ok
 }
 
-func Show() (accepted bool, filePath string) {
+func Show() (filePath string, accepted bool) {
 	dlg := New()
 	return dlg.Show()
 }
