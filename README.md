@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	if ok, filePath := openfiledialog.Show(); ok {
+	if filePath, ok := openfiledialog.Show(); ok {
 		fmt.Println(filePath)
 	}
 }
